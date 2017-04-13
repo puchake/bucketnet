@@ -3,27 +3,19 @@ from .EventTypes import EventTypes
 
 
 class SysexEvent (Event):
+    """
+    Class representing system exclusive events.
+    """
 
     def __init__(self, delta_time, status_code, length, data):
         super().__init__(delta_time, status_code, data)
         self._length = length
 
-    @property
-    def type(self):
+    def get_type(self):
         return EventTypes.SYSEX_EVENT
 
-    @property
-    def length(self):
-        return self._length
-
-    @property
-    def is_end_of_track(self):
-        return False
-
-    @property
-    def is_note_on(self):
-        return False
-
-    @property
-    def is_note_off(self):
-        return False
+    def write_to(self, destination):
+        destination.write_vlq(self._delta_time)
+        destination.write_byte(self._status_code)
+        destination.write_vlq(self._length)
+        destination.write(self._data)

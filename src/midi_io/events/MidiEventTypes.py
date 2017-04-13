@@ -3,6 +3,9 @@ from enum import Enum, unique
 
 @unique
 class MidiEventTypes (Enum):
+    """
+    Enum for available midi event types.
+    """
 
     NOTE_OFF = 0x80
     NOTE_ON = 0x90

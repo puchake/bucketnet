@@ -1,37 +1,42 @@
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 
 
 class Event (ABC):
+    """
+    Abstract class representing midi event.
+    """
 
     def __init__(self, delta_time, status_code, data):
         self._delta_time = delta_time
         self._status_code = status_code
         self._data = data
 
-    @abstractproperty
-    def type(self):
+    @abstractmethod
+    def get_type(self):
+        """
+        Get event type.
+
+        :return: one of EventTypes values
+        """
+
         pass
 
-    @property
-    def delta_time(self):
+    def get_delta_time(self):
+        """
+        Get delta time value.
+
+        :return: event delta time value.
+        """
+
         return self._delta_time
 
-    @property
-    def status_code(self):
-        return self._status_code
+    @abstractmethod
+    def write_to(self, destination):
+        """
+        Output event to destination as bytes in event type specific format.
 
-    @property
-    def data(self):
-        return self._data
+        :param destination: MidiBytesIO object which is writing destination
+        :return: -
+        """
 
-    @abstractproperty
-    def is_end_of_track(self):
-        pass
-
-    @abstractproperty
-    def is_note_on(self):
-        pass
-
-    @abstractproperty
-    def is_note_off(self):
         pass
