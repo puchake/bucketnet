@@ -22,8 +22,56 @@ class MidiEvent (Event):
     # Special note-on event velocity meaning that this event turns note off.
     NOTE_OFF_VELOCITY = 0
 
-    def __init__(self, delta_time, status_code, data):
-        super().__init__(delta_time, status_code, data)
+    # midi-event-type -> number-of-data-bytes dictionary
+    MIDI_EVENT_LENGTHS = {
+        MidiEventTypes.NOTE_OFF: 2,
+        MidiEventTypes.NOTE_ON: 2,
+        MidiEventTypes.POLYPHONIC_PRESSURE: 2,
+        MidiEventTypes.CONTROLLER: 2,
+        MidiEventTypes.PROGRAM_CHANGE: 1,
+        MidiEventTypes.CHANNEL_PRESSURE: 1,
+        MidiEventTypes.PITCH_BEND: 2
+    }
+
+    def __init__(self, delta_time, status_code):
+        super().__init__(delta_time, status_code)
+
+    @classmethod
+    def from_bytes(cls, delta_time, status_code, source):
+        """
+        Initialize new midi event with delta_time and status_code.
+        Read remaining data from source.
+
+        :param delta_time: event's delta_time
+        :param status_code: event's status_code
+        :param source: MidiBytesIO object, source for reading
+        """
+
+        midi_event = cls(delta_time, status_code)
+
+        # Determine event's data length and read it from source.
+        data_length = MidiEvent.MIDI_EVENT_LENGTHS[midi_event._get_midi_type()]
+        midi_event._data = source.read(data_length)
+
+        return midi_event
+
+    @classmethod
+    def from_values(cls, delta_time, status_code, data):
+        """
+        Initialize new midi event with delta_time and status_code.
+        Save input data as bytes inside.
+
+        :param delta_time: event's delta_time
+        :param status_code: event's status_code
+        :param data: array of event's data values
+        """
+
+        midi_event = cls(delta_time, status_code)
+
+        # Determine event's data length and read it from source.
+        midi_event._data = bytes(data)
+
+        return midi_event
 
     def get_type(self):
         return EventTypes.MIDI_EVENT
@@ -46,7 +94,7 @@ class MidiEvent (Event):
 
         return self._get_midi_type() == MidiEventTypes.NOTE_OFF or \
                (self._get_midi_type() == MidiEventTypes.NOTE_ON and
-                self._get_velocity() == MidiEventTypes.NOTE_OFF_VELOCITY)
+                self.get_velocity() == MidiEventTypes.NOTE_OFF_VELOCITY)
 
     def is_drums_event(self):
         """
@@ -61,6 +109,24 @@ class MidiEvent (Event):
         destination.write_vlq(self._delta_time)
         destination.write_byte(self._status_code)
         destination.write(self._data)
+
+    def get_pitch(self):
+        """
+        Get note's pitch number from data byte array.
+
+        :return: Get pitch number
+        """
+
+        return self._data[MidiEvent.NOTE_EVENT_PITCH]
+
+    def get_velocity(self):
+        """
+        Get note's velocity from data array.
+
+        :return: note's velocity
+        """
+
+        return self._data[MidiEvent.NOTE_EVENT_VELOCITY]
 
     def _get_midi_type(self):
         """
@@ -79,21 +145,3 @@ class MidiEvent (Event):
         """
 
         return self._status_code & MidiEvent.CHANNEL_MASK
-
-    def _get_pitch(self):
-        """
-        Get note's pitch number from data byte array.
-
-        :return: Get pitch number
-        """
-
-        return self._data[MidiEvent.NOTE_EVENT_PITCH]
-
-    def _get_velocity(self):
-        """
-        Get note's velocity from data array.
-
-        :return: note's velocity
-        """
-
-        return self._data[MidiEvent.NOTE_EVENT_VELOCITY]

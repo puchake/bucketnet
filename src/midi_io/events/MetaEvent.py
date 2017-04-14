@@ -10,10 +10,20 @@ class MetaEvent (Event):
     # Constant meta type indicating end-of-track event.
     END_OF_TRACK_META_TYPE = 0x2F
 
-    def __init__(self, delta_time, status_code, meta_type, length, data):
-        super().__init__(delta_time, status_code, data)
-        self._meta_type = meta_type
-        self._length = length
+    def __init__(self, delta_time, status_code, source):
+        """
+        Initialize new meta event with delta_time and status_code.
+        Read remaining data from source.
+
+        :param delta_time: event's delta_time
+        :param status_code: event's status_code
+        :param source: MidiBytesIO object, source for reading
+        """
+
+        super().__init__(delta_time, status_code)
+        self._meta_type = source.read_byte()
+        self._length = source.read_vlq()
+        self._data = source.read(self._length)
 
     def get_type(self):
         return EventTypes.META_EVENT

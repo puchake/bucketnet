@@ -6,10 +6,10 @@ class Event (ABC):
     Abstract class representing midi event.
     """
 
-    def __init__(self, delta_time, status_code, data):
+    def __init__(self, delta_time, status_code):
         self._delta_time = delta_time
         self._status_code = status_code
-        self._data = data
+        self._data = b''
 
     @abstractmethod
     def get_type(self):
@@ -25,7 +25,7 @@ class Event (ABC):
         """
         Get delta time value.
 
-        :return: event delta time value.
+        :return: event's delta time value.
         """
 
         return self._delta_time
