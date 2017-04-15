@@ -36,6 +36,42 @@ class Note (ABC):
         self._delta_time = delta_time
         self._duration = duration
 
+    def get_type(self):
+        """
+        Get note's type.
+
+        :return: note's type
+        """
+
+        return self._type
+
+    def get_pitch(self):
+        """
+        Get note's pitch.
+
+        :return: note's pitch
+        """
+
+        return self._pitch
+
+    def get_delta_time(self):
+        """
+        Get note's delta time.
+
+        :return: note's delta time
+        """
+
+        return self._delta_time
+
+    def get_duration(self):
+        """
+        Get note's duration.
+
+        :return: note's duration
+        """
+
+        return self._duration
+
     @abstractmethod
     def convert_to_vector(self):
         """

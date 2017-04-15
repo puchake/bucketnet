@@ -3,6 +3,8 @@ from .TrackTypes import TrackTypes
 from ..events.MidiEvent import MidiEvent
 from ..events.MetaEvent import MetaEvent
 from ..events.SysexEvent import SysexEvent
+from ..notes.GuitarNote import GuitarNote
+from ..notes.DrumsNote import DrumsNote
 
 
 class EventsTrack (Track):
