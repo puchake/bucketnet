@@ -83,7 +83,8 @@ class MidiEvent (Event):
         :return: check result
         """
 
-        return self._get_midi_type() == MidiEventTypes.NOTE_ON
+        return self._get_midi_type() == MidiEventTypes.NOTE_ON and \
+               self.get_velocity() != MidiEventTypes.NOTE_OFF_VELOCITY
 
     def is_note_off(self):
         """
