@@ -1,5 +1,6 @@
 from .Track import Track
 from .TrackTypes import TrackTypes
+from ..notes.GuitarNote import Note
 from ..notes.GuitarNote import GuitarNote
 from ..notes.DrumsNote import DrumsNote
 from ..events.MidiEvent import MidiEvent
@@ -35,7 +36,7 @@ class NotesTrack (Track):
         self._notes = []
 
     @classmethod
-    def from_matrix(cls, type, ticks_per_quarter_note, matrix, matrix_wrap):
+    def from_matrix(cls, type, ticks_per_quarter_note, matrix):
         """
         Constructor overload for creating notes track from notes numpy matrix.
 
@@ -47,15 +48,21 @@ class NotesTrack (Track):
         # Create notes_track object.
         notes_track = cls(type, ticks_per_quarter_note)
 
-        # Get unwrapped matrix of notes.
-        unwrapped_matrix = NotesTrack._unwrap_notes_matrix(matrix, matrix_wrap)
+        # Get reshaped matrix of notes.
+        note_vector_length = Note.TIME_LENGTH_VECTOR_LENGTH * 2
+        if type == TrackTypes.GUITAR_TRACK:
+            note_vector_length += GuitarNote.GUITAR_PITCH_VECTOR_LENGTH
+            reshaped_matrix = np.reshape(matrix, [-1, note_vector_length])
+        else:
+            note_vector_length += DrumsNote.DRUMS_PITCH_VECTOR_LENGTH
+            reshaped_matrix = np.reshape(matrix, [-1, note_vector_length])
 
         # For every note stored in matrix:
-        for i in range(unwrapped_matrix.shape[0]):
+        for i in range(reshaped_matrix.shape[0]):
 
             # Read note from current unwrapped_matrix row and append it
             # to track notes.
-            notes_track._read_note(unwrapped_matrix[i])
+            notes_track._read_note(reshaped_matrix[i])
 
         return notes_track
 

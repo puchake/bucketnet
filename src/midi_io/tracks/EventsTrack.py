@@ -58,8 +58,8 @@ class EventsTrack (Track):
         # Interpret bytes from source as events and save them to events track
         # until end of track event is read and saved.
         while True:
-            event = events_track._read_event(source)
-            if event.is_end_of_track():
+            events_track._read_event(source)
+            if events_track._events[-1].is_end_of_track():
                 break
 
         # Determine whether it is guitar or drums track.
@@ -141,7 +141,7 @@ class EventsTrack (Track):
         # Find first event in track's events and determine track type
         # based on whether it is drum note or not.
         for event in self._events:
-            if event.is_drum_note():
+            if event.is_drums_event():
                 self._type = TrackTypes.DRUMS_TRACK
                 break
             else:

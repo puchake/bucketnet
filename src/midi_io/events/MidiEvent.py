@@ -48,11 +48,8 @@ class MidiEvent (Event):
         """
 
         midi_event = cls(delta_time, status_code)
-
-        # Determine event's data length and read it from source.
         data_length = MidiEvent.MIDI_EVENT_LENGTHS[midi_event._get_midi_type()]
         midi_event._data = source.read(data_length)
-
         return midi_event
 
     @classmethod
@@ -67,43 +64,22 @@ class MidiEvent (Event):
         """
 
         midi_event = cls(delta_time, status_code)
-
-        # Determine event's data length and read it from source.
         midi_event._data = bytes(data)
-
         return midi_event
 
     def get_type(self):
         return EventTypes.MIDI_EVENT
 
     def is_note_on(self):
-        """
-        Check if midi event is note-on event.
-
-        :return: check result
-        """
-
         return self._get_midi_type() == MidiEventTypes.NOTE_ON and \
                self.get_velocity() != MidiEventTypes.NOTE_OFF_VELOCITY
 
     def is_note_off(self):
-        """
-        Check if midi event is note-off event.
-
-        :return: check result
-        """
-
         return self._get_midi_type() == MidiEventTypes.NOTE_OFF or \
                (self._get_midi_type() == MidiEventTypes.NOTE_ON and
                 self.get_velocity() == MidiEventTypes.NOTE_OFF_VELOCITY)
 
     def is_drums_event(self):
-        """
-        Check if midi event is related to percussion channel.
-
-        :return: check result
-        """
-
         return self._get_channel() == MidiEvent.DRUMS_CHANNEL
 
     def write_to(self, destination):

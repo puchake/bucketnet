@@ -29,11 +29,6 @@ class MetaEvent (Event):
         return EventTypes.META_EVENT
 
     def is_end_of_track(self):
-        """
-        Check if event is end-of-track-event.
-
-        :return: check result
-        """
         return self._meta_type == MetaEvent.END_OF_TRACK_META_TYPE
 
     def write_to(self, destination):

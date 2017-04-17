@@ -30,6 +30,42 @@ class Event (ABC):
 
         return self._delta_time
 
+    def is_note_on(self):
+        """
+        Check if midi event is note-on event.
+
+        :return: check result
+        """
+
+        return False
+
+    def is_note_off(self):
+        """
+        Check if midi event is note-off event.
+
+        :return: check result
+        """
+
+        return False
+
+    def is_drums_event(self):
+        """
+        Check if midi event is related to percussion channel.
+
+        :return: check result
+        """
+
+        return False
+
+    def is_end_of_track(self):
+        """
+        Check if event is end-of-track-event.
+
+        :return: check result
+        """
+
+        return False
+
     @abstractmethod
     def write_to(self, destination):
         """
