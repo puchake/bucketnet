@@ -17,7 +17,7 @@ MIN_GUITAR_PITCH = 24
 MAX_GUITAR_PITCH = 95
 
 # List of recognised drums pitches + pause pitch.
-DRUMS_PITCH_LIST = list(range(35, 54)) + [55, 57, 59, -1]
+DRUMS_PITCH_LIST = list(range(31, 54)) + [55, 57, 59, -1]
 
 # Constant pitches per octave and number of octaves for guitar's pitch.
 PITCHES_PER_OCTAVE = 12

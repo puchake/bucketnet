@@ -111,7 +111,7 @@ class NotesHandlingTestCase (unittest.TestCase):
         # Arrange
         pitch = 53
         expected_vector = np.zeros(notes_handling.DRUMS_PITCH_VECTOR_LENGTH)
-        expected_vector[18] = 1.0
+        expected_vector[22] = 1.0
 
         # Act
         vector = notes_handling.convert_pitch_to_vector(
@@ -141,7 +141,7 @@ class NotesHandlingTestCase (unittest.TestCase):
 
         # Arrange
         vector = np.zeros([notes_handling.DRUMS_PITCH_VECTOR_LENGTH, ])
-        vector[12] = 1.0
+        vector[16] = 1.0
         expected_pitch = 47
 
         # Act

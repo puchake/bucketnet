@@ -75,6 +75,8 @@ def convert_events_to_notes(
         notes_values += pauses
         notes_values.append(note_values)
 
+    # TODO think about pauses insertion
+
     # Trim notes durations and insert pauses into remaining empty spaces.
     fix_chords(notes_values, ticks_per_quarter_note)
     trim_chords_durations(notes_values)
