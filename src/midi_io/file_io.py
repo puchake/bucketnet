@@ -171,13 +171,14 @@ def read_notes_file(source):
                              2 * notes_handling.TIME_VECTOR_LENGTH
 
     # Read notes matrix and reshape it to wrapped notes matrix.
-    wrapped_notes_matrix = np.fromfile(source).reshape(
-        [-1, notes_frame_width, note_vector_length]
-    )
-
-    notes_matrix = notes_handling.unwrap_notes_matrix(
-        wrapped_notes_matrix, matrix_wrap, notes_frame_width
-    )
+    #wrapped_notes_matrix = np.fromfile(source).reshape(
+    #    [-1, notes_frame_width, note_vector_length]
+    #)
+    #
+    #notes_matrix = notes_handling.unwrap_notes_matrix(
+    #    wrapped_notes_matrix, matrix_wrap, notes_frame_width
+    #)
+    notes_matrix = np.fromfile(source).reshape([-1, note_vector_length])
     notes = []
 
     # Convert all note vectors to their note representations.
@@ -232,11 +233,12 @@ def write_notes_file(
     for i in range(notes_matrix.shape[0]):
         notes_matrix[i] = notes_handling.convert_note_to_vector(notes[i])
 
+    notes_matrix.tofile(destination)
     # Create and output to file wrapped notes matrix.
-    wrapped_notes_matrix = notes_handling.wrap_notes_matrix(
-        notes_matrix, matrix_wrap, notes_frame_width
-    )
-    wrapped_notes_matrix.tofile(destination)
+    #wrapped_notes_matrix = notes_handling.wrap_notes_matrix(
+    #    notes_matrix, matrix_wrap, notes_frame_width
+    #)
+    #wrapped_notes_matrix.tofile(destination)
 
 
 def write_notes_header(

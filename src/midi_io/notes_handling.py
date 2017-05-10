@@ -190,6 +190,9 @@ def convert_vector_to_time(vector):
     return POSSIBLE_TIMINGS[time_type_index, time_length_index]
 
 
+# These functions might not have an use anymore.
+
+
 def wrap_notes_matrix(matrix, matrix_wrap, notes_frame_width):
     """
     Convert continuous notes matrix to its wrapped form.
