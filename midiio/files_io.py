@@ -40,5 +40,5 @@ def export_midi_files_to_mats(midi_dir_path, transposes, out_dir_path):
             export_midi_file_to_mats(path.join(midi_dir_path, filename),
                                      transposes, out_dir_path)
             print("{} - {}".format(filename, "Processing done."))
-        except IOError:
+        except (IOError, ValueError):
             print("{} - {}".format(filename, "Corrupted file."))

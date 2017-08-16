@@ -26,22 +26,31 @@ ON_MSG_TOKEN = 1
 OFF_MSG_TOKEN = 0
 
 
-def open_note(notes, on_msg, current_time, last_on_msg_time, ticks_per_beat,
+def open_note(notes, on_note, current_time, last_on_msg_time, ticks_per_beat,
               current_tempo, open_notes_is, open_notes_times):
     """ Create a new incomplete note and insert it into notes list. """
-    notes.append(note_from_midi(on_msg.note, current_time - last_on_msg_time,
+    notes.append(note_from_midi(on_note, current_time - last_on_msg_time,
                                 ticks_per_beat, current_tempo))
-    open_notes_is[on_msg.note] = len(notes) - 1
-    open_notes_times[on_msg.note] = current_time
+    open_notes_is[on_note] = len(notes) - 1
+    open_notes_times[on_note] = current_time
 
 
-def close_note(notes, off_msg, current_time, ticks_per_beat, open_notes_is,
+def close_note(notes, off_note, current_time, ticks_per_beat, open_notes_is,
                open_notes_times):
     """ Close previously opened incomplete note. """
-    notes[open_notes_is[off_msg.note]].duration = find_time_unit(
-        current_time - open_notes_times[off_msg.note], ticks_per_beat,
+    notes[open_notes_is[off_note]].duration = find_time_unit(
+        current_time - open_notes_times[off_note], ticks_per_beat,
     )
-    open_notes_is[off_msg.note] = INVALID_NOTE_I
+    open_notes_is[off_note] = INVALID_NOTE_I
+
+
+def close_all_notes(notes, current_time, ticks_per_beat, open_notes_is,
+                    open_notes_times):
+    """ Close all still not finished notes. """
+    for note in range(NUM_OF_PITCHES):
+        if open_notes_is[note] != INVALID_NOTE_I:
+            close_note(notes, note, current_time, ticks_per_beat, open_notes_is,
+                       open_notes_times)
 
 
 def notes_from_track(track, ticks_per_beat):
@@ -60,18 +69,23 @@ def notes_from_track(track, ticks_per_beat):
             # If note on this msg's pitch wasn't closed then do it before
             # opening a new note.
             if open_notes_is[msg.note] != INVALID_NOTE_I:
-                close_note(notes, msg, current_time, ticks_per_beat,
+                close_note(notes, msg.note, current_time, ticks_per_beat,
                            open_notes_is, open_notes_times)
-            open_note(notes, msg, current_time, last_on_msg_time,
+            open_note(notes, msg.note, current_time, last_on_msg_time,
                       ticks_per_beat, current_tempo, open_notes_is,
                       open_notes_times)
             last_on_msg_time = current_time
         elif (msg.type == "note_off"
+              and open_notes_is[msg.note] != INVALID_NOTE_I
               or msg.type == "note_on" and msg.velocity == 0):
-            close_note(notes, msg, current_time, ticks_per_beat, open_notes_is,
-                       open_notes_times)
+            close_note(notes, msg.note, current_time, ticks_per_beat,
+                       open_notes_is, open_notes_times)
         elif msg.type == "set_tempo":
             current_tempo = msg.tempo
+    # At the end of conversion close all unfinished notes to ensure not empty
+    # note durations.
+    close_all_notes(notes, current_time, ticks_per_beat, open_notes_is,
+                    open_notes_times)
     return notes
 
 
