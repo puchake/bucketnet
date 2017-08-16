@@ -42,7 +42,7 @@ def create_guitar_track(tempo, guitar_program_i):
     return track
 
 
-def get_single_guitar_track_from_file(midi_file):
+def get_guitar_track_from_file(midi_file):
     """
     Check if given midi file contains only one guitar track and return it,
     if it does.
