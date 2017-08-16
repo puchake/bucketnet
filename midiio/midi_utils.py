@@ -40,3 +40,22 @@ def create_guitar_track(tempo, guitar_program_i):
                              program=FIRST_GUITAR_PROGRAM + guitar_program_i)
     track = [tempo_change, program_change]
     return track
+
+
+def get_single_guitar_track_from_file(midi_file):
+    """
+    Check if given midi file contains only one guitar track and return it,
+    if it does.
+    """
+    if len(midi_file.tracks) == 1 and is_guitar_track(midi_file.tracks[0]):
+        return midi_file.tracks[0]
+    # Sometimes there are files with two tracks one of which is entirely
+    # composed out of meta events. These are treated as single track files too.
+    elif len(midi_file.tracks) == 2:
+        if (is_meta_track(midi_file.tracks[0])
+                and is_guitar_track(midi_file.tracks[1])):
+            return midi_file.tracks[1]
+        elif (is_meta_track(midi_file.tracks[1])
+              and is_guitar_track(midi_file.tracks[0])):
+            return midi_file.tracks[0]
+    return None
