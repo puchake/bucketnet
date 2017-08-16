@@ -1,0 +1,135 @@
+"""
+This module contains functions used to convert midi tracks to notes list and
+further to numpy matrices. It also allows conversion from matrix back to the
+midi track.
+"""
+
+
+from heapq import heappush, heappop
+
+import numpy as np
+
+from midiio.note_utils import note_from_midi, note_from_vec, find_time_unit
+from midiio.midi_utils import create_guitar_track
+
+
+NUM_OF_PITCHES = 128
+DEFAULT_TEMPO = 500000
+INVALID_NOTE_I = -1
+
+# Tokens used in notes to track conversion. They are inserted into
+# (msg_time, msg) pair, which is pushed on the heap to make sure that the note
+# off messages come before note on ones.
+ON_MSG_TOKEN = 1
+OFF_MSG_TOKEN = 0
+
+
+def open_note(notes, on_msg, current_time, last_on_msg_time, ticks_per_beat,
+              current_tempo, open_notes_is, open_notes_times):
+    """ Create a new incomplete note and insert it into notes list. """
+    notes.append(note_from_midi(on_msg.note, current_time - last_on_msg_time,
+                                ticks_per_beat, current_tempo))
+    open_notes_is[on_msg.note] = len(notes) - 1
+    open_notes_times[on_msg.note] = current_time
+
+
+def close_note(notes, off_msg, current_time, ticks_per_beat, open_notes_is,
+               open_notes_times):
+    """ Close previously opened incomplete note. """
+    notes[open_notes_is[off_msg.note]].duration = find_time_unit(
+        current_time - open_notes_times[off_msg.note], ticks_per_beat,
+    )
+    open_notes_is[off_msg.note] = INVALID_NOTE_I
+
+
+def notes_from_track(track, ticks_per_beat):
+    """ Extract notes from track and return list of them. """
+    notes = []
+    # Arrays used to keep track of where in the notes array the last note with
+    # given pitch was placed and at what time it was placed there.
+    open_notes_is = [INVALID_NOTE_I] * NUM_OF_PITCHES
+    open_notes_times = [INVALID_NOTE_I] * NUM_OF_PITCHES
+    current_time = 0
+    last_on_msg_time = 0
+    current_tempo = DEFAULT_TEMPO
+    for msg in track:
+        current_time += msg.time
+        if msg.type == "note_on" and msg.velocity != 0:
+            # If note on this msg's pitch wasn't closed then do it before
+            # opening a new note.
+            if open_notes_is[msg.note] != INVALID_NOTE_I:
+                close_note(notes, msg, current_time, ticks_per_beat,
+                           open_notes_is, open_notes_times)
+            open_note(notes, msg, current_time, last_on_msg_time,
+                      ticks_per_beat, current_tempo, open_notes_is,
+                      open_notes_times)
+            last_on_msg_time = current_time
+        elif (msg.type == "note_off"
+              or msg.type == "note_on" and msg.velocity == 0):
+            close_note(notes, msg, current_time, ticks_per_beat, open_notes_is,
+                       open_notes_times)
+        elif msg.type == "set_tempo":
+            current_tempo = msg.tempo
+    return notes
+
+
+def msgs_heap_from_notes(notes, ticks_per_beat, tempo):
+    """
+    Transform list of notes into messages and save them on a heap to order them
+    by their time.
+    """
+    heap = []
+    last_on_msg_time = 0
+    msg_counter = 0
+    for note in notes:
+        on_msg, off_msg, on_msg_delta_time, off_msg_delta_time = note.to_msgs(
+            ticks_per_beat, tempo
+        )
+        # Determine on and off message times.
+        on_msg_time = last_on_msg_time + on_msg_delta_time
+        off_msg_time = last_on_msg_time + off_msg_delta_time
+        last_on_msg_time = on_msg_time
+        # Push messages on the heap paired with their type and tokes, so that
+        # later, when heappop is used, note off messages will come before note
+        # on ones. Include messages counter to break the heappush tie.
+        heappush(heap, (on_msg_time, ON_MSG_TOKEN, msg_counter, on_msg))
+        heappush(heap, (off_msg_time, OFF_MSG_TOKEN, msg_counter + 1, off_msg))
+        msg_counter += 2
+    return heap
+
+
+def track_from_msgs_heap(msgs_heap, tempo, guitar_program_i):
+    """ Unroll messages heap to a midi track. """
+    track = create_guitar_track(tempo, guitar_program_i)
+    prev_msg_time = 0
+    while msgs_heap:
+        msg_time, _, _, msg = heappop(msgs_heap)
+        # Determine this message's delta time from the previous message time.
+        msg.time = msg_time - prev_msg_time
+        prev_msg_time = msg_time
+        track.append(msg)
+    return track
+
+
+def track_from_notes(notes, ticks_per_beat, tempo, guitar_program_i):
+    """ Transform list of notes to a midi track. """
+    msgs_heap = msgs_heap_from_notes(notes, ticks_per_beat, tempo)
+    track = track_from_msgs_heap(msgs_heap, tempo, guitar_program_i)
+    return track
+
+
+def notes_from_mat(mat):
+    """ Transform matrix of note vectors to the list of notes. """
+    notes = []
+    for row in mat:
+        notes.append(note_from_vec(row))
+    return notes
+
+
+def mat_from_notes(notes):
+    """ Transform list of notes into matrix of note vectors. """
+    rows = []
+    for note in notes:
+        rows.append(note.to_vec())
+    mat = np.stack(rows)
+    return mat
