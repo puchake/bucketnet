@@ -1,16 +1,18 @@
 """
-This module contains functions used to convert midi tracks to notes list and
-further to numpy matrices. It also allows conversion from matrix back to the
+This module contains functions used to convert midi tracks/files to notes list
+and further to numpy matrices. It also allows conversion from matrix back to the
 midi track.
 """
 
 
 from heapq import heappush, heappop
 
+from mido import MidiFile
 import numpy as np
 
-from midiio.note_utils import note_from_midi, note_from_vec, find_time_unit
-from midiio.midi_utils import create_guitar_track
+from midiio.note_utils import (note_from_midi, note_from_vec, find_time_unit,
+                               transpose_notes, TEMPO_I)
+from midiio.midi_utils import create_guitar_track, get_guitar_track_from_file
 
 
 NUM_OF_PITCHES = 128
@@ -135,15 +137,33 @@ def mat_from_notes(notes):
     return mat
 
 
-def mat_from_track(track, ticks_per_beat):
-    """ Convert midi track to matrix of note vectors. """
-    notes = notes_from_track(track, ticks_per_beat)
-    mat = mat_from_notes(notes)
-    return mat
-
-
 def track_from_mat(mat, ticks_per_beat, tempo, guitar_program_i):
     """ Transform notes matrix into midi track. """
     notes = notes_from_mat(mat)
     track = track_from_notes(notes, ticks_per_beat, tempo, guitar_program_i)
     return track
+
+
+def mats_from_midi_file(midi_file, transposes):
+    """  """
+    track = get_guitar_track_from_file(midi_file)
+    # If file doesn't contain single guitar track, return empty list.
+    if not track:
+        return []
+    notes = notes_from_track(track, midi_file.ticks_per_beat)
+    mats = [mat_from_notes(notes)]
+    # Perform data augmentation by transposing notes list.
+    for transpose in transposes:
+        transposed_notes = transpose_notes(notes, transpose)
+        mats.append(mat_from_notes(transposed_notes))
+    return mats
+
+
+def midi_file_from_mat(mat, ticks_per_beat, guitar_program_i):
+    """  """
+    # Use single tempo for whole track (maybe temporarily).
+    tempo = mat[0, TEMPO_I]
+    track = track_from_mat(mat, ticks_per_beat, tempo, guitar_program_i)
+    midi_file = MidiFile(ticks_per_beat=ticks_per_beat)
+    midi_file.tracks.append(track)
+    return midi_file
