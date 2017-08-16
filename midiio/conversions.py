@@ -99,7 +99,7 @@ def msgs_heap_from_notes(notes, ticks_per_beat, tempo):
     msg_counter = 0
     for note in notes:
         on_msg, off_msg, on_msg_delta_time, off_msg_delta_time = note.to_msgs(
-            ticks_per_beat, tempo
+            ticks_per_beat
         )
         # Determine on and off message times.
         on_msg_time = last_on_msg_time + on_msg_delta_time
@@ -176,7 +176,7 @@ def mats_from_midi_file(midi_file, transposes):
 def midi_file_from_mat(mat, ticks_per_beat, guitar_program_i):
     """ Convert notes matrix directly to midi file object. """
     # Use single tempo for whole track (maybe temporarily).
-    tempo = mat[0, TEMPO_I]
+    tempo = int(mat[0, TEMPO_I])
     track = track_from_mat(mat, ticks_per_beat, tempo, guitar_program_i)
     midi_file = MidiFile(ticks_per_beat=ticks_per_beat)
     midi_file.tracks.append(track)
