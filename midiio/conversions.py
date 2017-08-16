@@ -133,3 +133,17 @@ def mat_from_notes(notes):
         rows.append(note.to_vec())
     mat = np.stack(rows)
     return mat
+
+
+def mat_from_track(track, ticks_per_beat):
+    """ Convert midi track to matrix of note vectors. """
+    notes = notes_from_track(track, ticks_per_beat)
+    mat = mat_from_notes(notes)
+    return mat
+
+
+def track_from_mat(mat, ticks_per_beat, tempo, guitar_program_i):
+    """ Transform notes matrix into midi track. """
+    notes = notes_from_mat(mat)
+    track = track_from_notes(notes, ticks_per_beat, tempo, guitar_program_i)
+    return track
