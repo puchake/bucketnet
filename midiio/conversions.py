@@ -145,7 +145,7 @@ def track_from_mat(mat, ticks_per_beat, tempo, guitar_program_i):
 
 
 def mats_from_midi_file(midi_file, transposes):
-    """  """
+    """ Convert midi file directly to list of mats with data augmentation. """
     track = get_guitar_track_from_file(midi_file)
     # If file doesn't contain single guitar track, return empty list.
     if not track:
@@ -160,7 +160,7 @@ def mats_from_midi_file(midi_file, transposes):
 
 
 def midi_file_from_mat(mat, ticks_per_beat, guitar_program_i):
-    """  """
+    """ Convert notes matrix directly to midi file object. """
     # Use single tempo for whole track (maybe temporarily).
     tempo = mat[0, TEMPO_I]
     track = track_from_mat(mat, ticks_per_beat, tempo, guitar_program_i)
