@@ -10,7 +10,7 @@ def main():
                         "data/best_model/decoder.dict")
     print(
         composer.compose(
-            "\"Em\" e>d c<B \"D\" A2 GA |! \"G\" B3c \"D\" A3B | \"G\" G>B d<B \"C\" c2 (3ABc |\n", 300
+            "~e3d efg2|~e3f gedB|~e3d efg2|G2AB gedB|\n", 300
         )
     )
 
