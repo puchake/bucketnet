@@ -122,6 +122,7 @@ class Dataset:
         # Extract only text from list of elements.
         for i in range(len(tunes)):
             tunes[i] = tunes[i][0]
+            # Pad tunes at the end with newline characters.
             tunes[i] += "\n" * (roll_out - (len(tunes) % roll_out))
         shuffle(tunes)
         # Split tunes between train, validation and test subsets.

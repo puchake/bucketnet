@@ -5,11 +5,14 @@ from model.composer import Composer
 
 
 def main():
-    composer = Composer("data/logs/test_run_8/best_model/model",
-                        "data/logs/test_run_8/best_model/model.meta",
-                        "data/logs/test_run_8/encoder.dict",
-                        "data/logs/test_run_8/decoder.dict")
-    print(composer.compose("(3efd (3cdB A2 a2|(3aba (3gfe (3dAF (3DFA|GFED CEAG|\n", 300))
+    composer = Composer("data/best_model/model", "data/best_model/model.meta",
+                        "data/best_model/encoder.dict",
+                        "data/best_model/decoder.dict")
+    print(
+        composer.compose(
+            "\"Em\" e>d c<B \"D\" A2 GA |! \"G\" B3c \"D\" A3B | \"G\" G>B d<B \"C\" c2 (3ABc |\n", 300
+        )
+    )
 
 
 if __name__ == "__main__":
