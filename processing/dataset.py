@@ -4,6 +4,8 @@ models.
 """
 
 
+import pickle
+from os import path
 from random import shuffle
 
 import numpy as np
@@ -22,7 +24,7 @@ class Dataset:
                  subsets_sizes):
         self._batch_size = batch_size
         self._roll_out = roll_out
-        self._init_sets(file_path, filtering_params, subsets_sizes)
+        self._init_sets(file_path, filtering_params, subsets_sizes, roll_out)
         self._init_encoding()
         self._init_queues()
         self._init_batching()
@@ -33,10 +35,20 @@ class Dataset:
         while self._check_current_tunes(set_index, lstm_state):
             fill_reset = self._fill_empty_indices(set_index)
             queue_reset_occurred = queue_reset_occurred or fill_reset
-        print(self._tunes[set_index][self._tunes_indices[set_index][0]])
         self._fill_batch_matrix(set_index)
         self._advance_batch(set_index)
         return self._batch_matrix, queue_reset_occurred
+
+    def get_charset_size(self):
+        """ Access point for the charset size of the dataset. """
+        return self._charset_size
+
+    def save_encoding(self, dir_path):
+        """ Save encoder and decoder in target directory. """
+        with open(path.join(dir_path, "encoder.dict"), "wb") as file:
+            pickle.dump(self._encoder, file)
+        with open(path.join(dir_path, "decoder.dict"), "wb") as file:
+            pickle.dump(self._decoder, file)
 
     def _fill_batch_matrix(self, set_index):
         """ Fill in the batch matrix. """
@@ -76,7 +88,7 @@ class Dataset:
                 self._tunes[set_index][self._tunes_indices[set_index][i]]
             )
             current_tune_position = self._tunes_positions[set_index][i]
-            if current_tune_position + self._roll_out >= tune_len:
+            if current_tune_position + self._roll_out > tune_len:
                 reset_occurred = True
                 self._tunes_indices[set_index][i] = None
                 self._tunes_positions[set_index][i] = 0
@@ -103,13 +115,14 @@ class Dataset:
 
     # Initialization routines.
 
-    def _init_sets(self, file_path, filtering_params, subsets_sizes):
+    def _init_sets(self, file_path, filtering_params, subsets_sizes, roll_out):
         """ Initialize train, validation and tests subsets. """
         train_size, val_size, _ = subsets_sizes
         tunes = read_csv(file_path, [ABC], filtering_params)
         # Extract only text from list of elements.
         for i in range(len(tunes)):
             tunes[i] = tunes[i][0]
+            tunes[i] += "\n" * (roll_out - (len(tunes) % roll_out))
         shuffle(tunes)
         # Split tunes between train, validation and test subsets.
         first_split = int(train_size * len(tunes))
