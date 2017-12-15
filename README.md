@@ -15,3 +15,7 @@ For a sake of simplicity data used in training is in [.abc text music notation](
 If you would like only to see what the model is capable of, use `compose.py`. In this file you can tell the trained model to continue any input fragment of a song in .abc format or feed it nothing and see what it will come up with.
 
 If you would like to train your own model, because you want it to learn on a different kind of music, use `train.py`. There you can change filtering parameters for tunes and model's build and training parameters. If you want to switch the dataset altogether, you will have to fiddle around a little bit with the processing package as it is tailored to the specific .csv row format from TheSession's tunes collection.
+
+## Required packages
+
+Only tensorflow and numpy are needed to run the scripts, so simple `pip install tensorflow numpy` should be enough to get going.
